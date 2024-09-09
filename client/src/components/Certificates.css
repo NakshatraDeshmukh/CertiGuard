@@ -1,0 +1,145 @@
+/* Container */
+.certificates-container {
+  padding: 20px;
+  max-width: 1500px;
+  margin: 0 auto;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Form Styling */
+.certificate-form {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.form-table input {
+  padding: 8px;  /* Reduced padding */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  width: 85%; /* Reduced width */
+  transition: border-color 0.3s ease;
+  display: inline-block;
+}
+
+.form-table input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+/* Submit Button */
+.submit-button {
+  padding: 12px 25px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.submit-button:hover {
+  background-color: #388E3C;
+}
+
+/* Certificates Table */
+.certificates-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.certificates-table th, .certificates-table td {
+  border: 1px solid #ddd;
+  padding: 15px;
+  text-align: center; /* Center-align table headers and cells */
+  font-size: 12px; /* Adjusted font size */
+}
+
+.certificates-table th {
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.certificates-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.certificates-table tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+/* Buttons in the table */
+.update-button, .delete-button {
+  padding: 8px 16px; /* Adjusted padding for better alignment */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+}
+
+.update-button {
+  background-color: #4CAF50;
+  color: white;
+  margin-right: 10px; /* Space between buttons */
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #388E3C;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+/* Button Container */
+.button-container {
+  display: flex;
+  gap: 10px; 
+}
+
+/* Error Message Styling */
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* General Styles */
+h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+input {
+  font-size: 16px;
+}
+
+button {
+  font-size: 14px;
+}
