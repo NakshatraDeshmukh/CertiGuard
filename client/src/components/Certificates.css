@@ -21,11 +21,11 @@
 }
 
 .form-table input {
-  padding: 8px;  /* Reduced padding */
+  padding: 8px;  
   border-radius: 5px;
   border: 1px solid #ccc;
   box-sizing: border-box;
-  width: 85%; /* Reduced width */
+  width: 85%; 
   transition: border-color 0.3s ease;
   display: inline-block;
 }
@@ -55,6 +55,75 @@
   background-color: #388E3C;
 }
 
+/* Verification Form */
+.verification-form {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.verification-form .form-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Input Field Styles */
+.verification-form input {
+  padding: 8px;  
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  width: 85%; 
+  transition: border-color 0.3s ease;
+  display: inline-block;
+}
+
+.verification-form input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+/* Label and Input Layout */
+.verification-form label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.verification-form .form-group {
+  margin-bottom: 20px; 
+}
+
+/* Verify Button */
+.verify-button {
+  padding: 12px 25px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.verify-button:hover {
+  background-color: #388E3C;
+}
+
+/* Error Message Styling for Verification */
+.verification-error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+
 /* Certificates Table */
 .certificates-table {
   width: 100%;
@@ -66,8 +135,8 @@
 .certificates-table th, .certificates-table td {
   border: 1px solid #ddd;
   padding: 15px;
-  text-align: center; /* Center-align table headers and cells */
-  font-size: 12px; /* Adjusted font size */
+  text-align: center; 
+  font-size: 12px; 
 }
 
 .certificates-table th {
@@ -86,9 +155,17 @@
   cursor: pointer;
 }
 
+.certificates-table .hash-column {
+  width: 50px; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
 /* Buttons in the table */
 .update-button, .delete-button {
-  padding: 8px 16px; /* Adjusted padding for better alignment */
+  padding: 8px 16px; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -99,7 +176,7 @@
 .update-button {
   background-color: #4CAF50;
   color: white;
-  margin-right: 10px; /* Space between buttons */
+  margin-right: 10px; 
 }
 
 .delete-button {

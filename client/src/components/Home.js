@@ -12,7 +12,7 @@ const Home = () => {
     <div className="home-container">
       <div className="hero-section">
         <div className="hero-content">
-          <h2>Welcome To CertiGuard!</h2>
+          <h2>Welcome To CertiGuard !</h2>
           <button className="learn-more-button" onClick={handleLearnMoreClick}>
             Learn More
           </button>

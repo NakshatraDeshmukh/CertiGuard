@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS  
 import mysql.connector
 from flask import request, jsonify
+import hashlib
 
 
 app = Flask(__name__)
@@ -20,7 +21,7 @@ try:
     print("Connected to the database successfully!")
 except mysql.connector.Error as err:
     print(f"Database connection failed with error: {err}")
-    cursor = None  # Set cursor to None if the connection fails
+    cursor = None  # Setting cursor to None if the connection fails
 
 
 
@@ -133,23 +134,33 @@ def get_universities():
 
 
 
-
-
 @app.route('/add-certificate', methods=['POST'])
 def add_certificate():
-    data = request.json
-    student_id = data['student_id']
-    university_id = data['university_id']
-    issue_date = data['issue_date']
-    course = data['course']
+    try:
+        data = request.json
+        student_id = data.get('student_id')
+        university_id = data.get('university_id')
+        issue_date = data.get('issue_date')
+        course = data.get('course')
 
-    cursor.execute("""
-        INSERT INTO certificates (student_id, university_id, issue_date, course)
-        VALUES (%s, %s, %s, %s)
-    """, (student_id, university_id, issue_date, course))
-    
-    db.commit()
-    return jsonify({"message": "Certificate added successfully!"})
+        # Generating certificate hash
+        certificate_string = f"{student_id}{university_id}{issue_date}{course}"
+        certificate_hash = hashlib.sha256(certificate_string.encode()).hexdigest()
+
+        cursor.execute("""
+            INSERT INTO certificates (student_id, university_id, issue_date, course, certificate_hash)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (student_id, university_id, issue_date, course, certificate_hash))
+        
+        db.commit()
+        return jsonify({"message": "Certificate added successfully!", "certificate_hash": certificate_hash})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
 
 @app.route('/update-certificate', methods=['PUT'])
 def update_certificate():
@@ -178,11 +189,14 @@ def delete_certificate(certificate_id):
     db.commit()
     return jsonify({"message": "Certificate deleted successfully!"})
 
+
+
 @app.route('/certificates', methods=['GET'])
 def get_certificates():
     try:
         cursor.execute("""
             SELECT certificates.certificate_id, certificates.course, certificates.issue_date,
+                   certificates.certificate_hash,  -- Include certificate_hash
                    students.student_id, students.name, students.date_of_birth, students.email,
                    universities.university_id, universities.uniname, universities.location
             FROM certificates
@@ -198,16 +212,17 @@ def get_certificates():
                 'certificate_id': row[0],
                 'course': row[1],
                 'issue_date': row[2].strftime('%Y-%m-%d') if row[2] else None,
+                'certificate_hash': row[3],  
                 'student': {
-                    'student_id': row[3],
-                    'name': row[4],
-                    'date_of_birth': row[5].strftime('%Y-%m-%d') if row[5] else None,
-                    'email': row[6]
+                    'student_id': row[4],
+                    'name': row[5],
+                    'date_of_birth': row[6].strftime('%Y-%m-%d') if row[6] else None,
+                    'email': row[7]
                 },
                 'university': {
-                    'university_id': row[7],
-                    'uniname': row[8],
-                    'location': row[9]
+                    'university_id': row[8],
+                    'uniname': row[9],
+                    'location': row[10]
                 }
             }
             certificates_data.append(certificate_data)
@@ -216,8 +231,32 @@ def get_certificates():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/verify-certificate', methods=['POST'])
+def verify_certificate():
+    data = request.json
+    certificate_id = data.get('certificate_id')
+    student_id = data.get('student_id')
+    university_id = data.get('university_id')
 
+    if not certificate_id or not student_id or not university_id:
+        return jsonify({'error': 'Please provide Certificate ID, Student ID, and University ID.'}), 400
 
+    try:
+        cursor.execute("""
+            SELECT certificate_hash FROM certificates
+            WHERE certificate_id = %s
+            AND student_id = %s
+            AND university_id = %s
+        """, (certificate_id, student_id, university_id))
+        result = cursor.fetchone()
+
+        if result:
+            # Additional checks 
+            return jsonify({'valid': True, 'message': 'Certificate is valid.'})
+        else:
+            return jsonify({'valid': False, 'message': 'Certificate not found or details do not match.'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 
@@ -225,30 +264,42 @@ def get_certificates():
 
 @app.route('/student/<int:student_id>', methods=['GET'])
 def get_student(student_id):
-    student = Student.query.filter_by(student_id=student_id).first()
-    if student:
-        return jsonify({
-            'success': True,
-            'data': {
-                'name': student.name,
-                'date_of_birth': student.date_of_birth,
-                'email': student.email
+    try:
+        cursor.execute("SELECT * FROM students WHERE student_id = %s", (student_id,))
+        student = cursor.fetchone()
+        if student:
+            student_data = {
+                'student_id': student[0],
+                'name': student[1],
+                'date_of_birth': student[2].strftime('%Y-%m-%d') if student[2] else None,
+                'email': student[3]
             }
-        }), 200
-    return jsonify({'success': False, 'message': 'Student not found'}), 404
+            return jsonify({
+                'success': True,
+                'data': student_data
+            }), 200
+        return jsonify({'success': False, 'message': 'Student not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/university/<int:university_id>', methods=['GET'])
 def get_university(university_id):
-    university = University.query.filter_by(university_id=university_id).first()
-    if university:
-        return jsonify({
-            'success': True,
-            'data': {
-                'name': university.uniname,
-                'location': university.location
+    try:
+        cursor.execute("SELECT * FROM universities WHERE university_id = %s", (university_id,))
+        university = cursor.fetchone()
+        if university:
+            university_data = {
+                'university_id': university[0],
+                'uniname': university[1],
+                'location': university[2]
             }
-        }), 200
-    return jsonify({'success': False, 'message': 'University not found'}), 404
+            return jsonify({
+                'success': True,
+                'data': university_data
+            }), 200
+        return jsonify({'success': False, 'message': 'University not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 

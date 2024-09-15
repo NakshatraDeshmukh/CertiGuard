@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Web3 from 'web3';
 import './Certificates.css'; 
 
 const Certificates = () => {
@@ -11,22 +12,348 @@ const Certificates = () => {
     student_id: '',
     university_id: ''
   });
-  const [isUpdateMode, setIsUpdateMode] = useState(false); // Toggle between add and update mode
+  const [verificationForm, setVerificationForm] = useState({
+    certificate_id: '',
+    course: '',
+    issue_date: '',
+    student_id: '',
+    university_id: ''
+  });
+  const [verificationResult, setVerificationResult] = useState(null);
+
+  // Web3 setup
+  const web3 = new Web3(window.ethereum || 'http://localhost:7545'); // Connect to Ethereum node
+  const contractABI = [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "studentId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentName",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentDOB",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentEmail",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "course",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "issueDate",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "universityId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "universityName",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "universityLocation",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "certificateHash",
+          "type": "string"
+        }
+      ],
+      "name": "CertificateCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "studentId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentName",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentDOB",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "studentEmail",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "course",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "issueDate",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "universityId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "universityName",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "universityLocation",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        }
+      ],
+      "name": "CertificateVerified",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "certificateCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "certificates",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "studentId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "studentName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "studentDOB",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "studentEmail",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "course",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "issueDate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "universityId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "universityName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "universityLocation",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "certificateHash",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_studentId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_studentName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_studentDOB",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_studentEmail",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_course",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_issueDate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_universityId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_universityName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_universityLocation",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_certificateHash",
+          "type": "string"
+        }
+      ],
+      "name": "addCertificate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_certificateId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_certificateHash",
+          "type": "string"
+        }
+      ],
+      "name": "verifyCertificate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+  ;
+  const contractAddress = '0xB929D55cdDeD441A47016a72630bf33BC433d658';
+  const contract = new web3.eth.Contract(contractABI, contractAddress);
 
   // Fetch certificates with university and student details
   const fetchCertificates = async () => {
     try {
       const response = await axios.get('http://localhost:5000/certificates');
-      console.log('Fetched certificates data:', response.data); // Debug line
       if (Array.isArray(response.data)) {
         setCertificates(response.data);
       } else {
         console.error('Fetched data is not an array:', response.data);
-        setCertificates([]); // Set to empty array if data format is incorrect
+        setCertificates([]);
       }
     } catch (error) {
       console.error('Error fetching certificates:', error);
-      setCertificates([]); // Ensure certificates is an array
+      setCertificates([]);
     }
   };
 
@@ -39,75 +366,55 @@ const Certificates = () => {
     setCertificateForm({ ...certificateForm, [e.target.name]: e.target.value });
   };
 
-  // Add new certificate
+  const handleVerificationChange = (e) => {
+    setVerificationForm({ ...verificationForm, [e.target.name]: e.target.value });
+  };
+
+  // Adding new certificate
   const handleAddCertificate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/add-certificate', certificateForm);
-      alert('Certificate added successfully');
-      setCertificateForm({
-        certificate_id: '',
-        course: '',
-        issue_date: '',
-        student_id: '',
-        university_id: ''
-      });
-      fetchCertificates(); // Refresh list after adding
+        await axios.post('http://localhost:5000/add-certificate', certificateForm);
+        alert('Certificate added successfully');
+        setCertificateForm({
+            certificate_id: '',
+            course: '',
+            issue_date: '',
+            student_id: '',
+            university_id: ''
+        });
+        fetchCertificates(); 
     } catch (error) {
-      console.error('Error adding certificate:', error);
-      alert('Failed to add certificate');
+        console.error('Error adding certificate:', error);
+        alert('Failed to add certificate');
     }
   };
 
-  // Update certificate
-  const handleUpdateCertificate = async (e) => {
-    e.preventDefault();
+  // Verify certificate
+  const handleVerifyCertificate = async (e) => {
+    e.preventDefault(); 
     try {
-      await axios.put(`http://localhost:5000/update-certificate`, certificateForm);
-      alert('Certificate updated successfully');
-      setCertificateForm({
-        certificate_id: '',
-        course: '',
-        issue_date: '',
-        student_id: '',
-        university_id: ''
+      const response = await axios.post('http://localhost:5000/verify-certificate', {
+        certificate_id: verificationForm.certificate_id,
+        student_id: verificationForm.student_id,
+        university_id: verificationForm.university_id
       });
-      setIsUpdateMode(false); // Switch back to add mode
-      fetchCertificates(); // Refresh list after updating
+  
+      if (response.data.valid) {
+        setVerificationResult('Certificate is valid.');
+      } else {
+        setVerificationResult('Certificate is not valid.');
+      }
     } catch (error) {
-      console.error('Error updating certificate:', error);
-      alert('Failed to update certificate');
+      console.error('Error verifying certificate:', error);
+      setVerificationResult('Error verifying certificate.');
     }
   };
-
-  // Function to delete certificate
-  const deleteCertificate = async (certificateId) => {
-    try {
-      await axios.delete(`http://localhost:5000/delete-certificate/${certificateId}`);
-      alert('Certificate deleted successfully');
-      fetchCertificates(); // Refresh the list after deletion
-    } catch (error) {
-      console.error('Error deleting certificate:', error);
-      alert('Failed to delete certificate');
-    }
-  };
-
-  // Select certificate to update (populate form with existing data)
-  const selectCertificateToUpdate = (certificate) => {
-    setCertificateForm({
-      certificate_id: certificate.certificate_id,
-      course: certificate.course,
-      issue_date: certificate.issue_date,
-      student_id: certificate.student.student_id,
-      university_id: certificate.university.university_id
-    });
-    setIsUpdateMode(true); // Switch to update mode
-  };
-
+  
   return (
     <div className="certificates-container">
-      <h2>{isUpdateMode ? 'Update Certificate' : 'Add Certificate'}</h2>
-      <form onSubmit={isUpdateMode ? handleUpdateCertificate : handleAddCertificate} className="certificate-form">
+      <h2>Add Certificate</h2>
+      <form onSubmit={handleAddCertificate} className="certificate-form">
         <table className="form-table">
           <tbody>
             <tr>
@@ -122,14 +429,38 @@ const Certificates = () => {
               <td>University ID:</td>
               <td><input type="text" name="university_id" value={certificateForm.university_id} onChange={handleChange} className="form-input" required /></td>
               <td colSpan="4">
-                <button type="submit" className="submit-button">
-                  {isUpdateMode ? 'Update Certificate' : 'Add Certificate'}
-                </button>
+                <button type="submit" className="submit-button">Add Certificate</button>
               </td>
             </tr>
           </tbody>
         </table>
       </form>
+
+      <h2>Verify Certificate</h2>
+      <form onSubmit={handleVerifyCertificate} className="certificate-form">
+        <table className="form-table">
+          <tbody>
+            <tr>
+              <td>Certificate ID:</td>
+              <td><input type="text" name="certificate_id" value={verificationForm.certificate_id} onChange={handleVerificationChange} className="form-input" required /></td>
+              <td>Course:</td>
+              <td><input type="text" name="course" value={verificationForm.course} onChange={handleVerificationChange} className="form-input" required /></td>
+              <td>Issue Date:</td>
+              <td><input type="date" name="issue_date" value={verificationForm.issue_date} onChange={handleVerificationChange} className="form-input" required /></td>
+            </tr>
+            <tr>
+              <td>Student ID:</td>
+              <td><input type="text" name="student_id" value={verificationForm.student_id} onChange={handleVerificationChange} className="form-input" required /></td>
+              <td>University ID:</td>
+              <td><input type="text" name="university_id" value={verificationForm.university_id} onChange={handleVerificationChange} className="form-input" required /></td>
+              <td colSpan="4">
+                <button type="submit" className="submit-button">Verify Certificate</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+      {verificationResult && <p className="verification-result">{verificationResult}</p>}
 
       <h2>Certificates List</h2>
       <table className="certificates-table">
@@ -145,12 +476,12 @@ const Certificates = () => {
             <th>University ID</th>
             <th>University Name</th>
             <th>University Location</th>
-            <th>Actions</th>
+            <th class="hash-column">Certificate Hash</th>
           </tr>
         </thead>
         <tbody>
           {certificates.length === 0 ? (
-            <tr><td colSpan="8">No certificates available</td></tr>
+            <tr><td colSpan="11">No certificates available</td></tr>
           ) : (
             certificates.map((certificate) => (
               <tr key={certificate.certificate_id}>
@@ -164,12 +495,7 @@ const Certificates = () => {
                 <td>{certificate.university.university_id}</td>
                 <td>{certificate.university.uniname}</td>
                 <td>{certificate.university.location}</td>
-                <td>
-                  <div className="button-container">
-                    <button onClick={() => selectCertificateToUpdate(certificate)} className="update-button">Update</button>
-                    <button onClick={() => deleteCertificate(certificate.certificate_id)} className="delete-button">Delete</button>
-                  </div>
-                </td>
+                <td>{certificate.certificate_hash}</td> {/* Updating column */ }
               </tr>
             ))
           )}
