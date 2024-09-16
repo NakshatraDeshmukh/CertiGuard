@@ -40,7 +40,6 @@ pydantic_core==2.23.3
 python-dateutil==2.9.0.post0
 pytz==2024.1
 pyunormalize==15.1.0
-pywin32==306
 regex==2024.9.11
 requests==2.32.3
 rlp==4.0.1
